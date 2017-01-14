@@ -1,0 +1,176 @@
+<html>
+    <head>
+    	<script type="text/javascript" src="complex.min.js"></script>
+        <script type="text/javascript">
+			function mandelbrot(cr, ci, iters) {
+				var zr = 0;
+				var zi = 0;
+				for (var i = 0; i < iters; i++) {
+					if (zr*zr + zi*zi >= 4) {
+						return i;
+					}
+					temp = zr*zr - zi*zi + cr;
+					zi = 2*zr*zi + ci;
+					zr = temp;
+				}
+				return iters;
+			}
+			function cexp(x) {
+				ex = Math.exp(x[0])
+				return [ex*Math.cos(x[1]), ex*Math.sin(x[1])];
+			}
+			function rcpow(x, y) {
+				log = Math.log(x)
+				ex = Math.exp(y[0]*log)
+				return [ex*Math.cos(y[1]*log), ex*Math.sin(y[1]*log)];
+			}
+			function cintpow(x, y) {
+				_x = [x[0], x[1]]
+				for (var i = 2; i <= y; i++) {
+					_x = [x[0]*_x[0]-x[1]*_x[1], x[0]*_x[1] + _x[0]*x[1]]
+				}
+				return _x;
+			}
+			function crpow(x, y) {
+				a = x[0]
+				b = x[1]
+				c = y
+				arg = Math.atan2(b, a)
+			    magexp = Math.pow(a*a+b*b, c/2);
+			    p1 = Math.cos(c*arg);
+			    p2 = Math.sin(c*arg);
+			    real = p1*magexp;
+			    imag = p2*magexp;
+			    return [real, imag];
+			}
+			function ccpow(x, y) {
+				a = x[0]
+				b = x[1]
+				c = y[0]
+				d = y[1]
+				arg = Math.atan2(b, a)
+			    mag = a*a+b*b
+			    expdarg = Math.exp(-d*arg);
+			    magexp = Math.pow(mag, c/2);
+			    logmag = Math.log(mag)*d/2;
+			    p1 = expdarg*Math.cos(c*arg);
+			    p2 = expdarg*Math.sin(c*arg);
+			    q1 = magexp*Math.cos(logmag);
+			    q2 = magexp*Math.sin(logmag);
+			    real = p1*q1-p2*q2;
+			    imag = q1*p2+p1*q2;
+			    return [real, imag];
+			}
+			function cmag(x) {
+				return Math.sqrt(x[0]*x[0]+x[1]*x[1])
+			}
+			function cmag2(x) {
+				return x[0]*x[0]+x[1]*x[1]
+			}
+			function cneg(x) {
+				return [-x[0], -x[1]]
+			}
+			function cadd(x, y) {
+				return [x[0]+y[0], x[1]+y[1]]
+			}
+			function csub(x, y) {
+				return [x[0]-y[0], x[1]-y[1]]
+			}
+			function cmul(x, y) {
+				return [x[0]*y[0]-x[1]*y[1], x[0]*y[1]+y[0]*x[1]]
+			}
+			function cdiv(x, y) {
+				mag = y[0]*y[0]+y[1]*y[1]
+				return [(y[0]*x[0]+y[1]*x[1])/mag, (x[1]*y[0]-x[0]*y[1])/mag]
+			}
+			function csin(x) {
+				a = cexp(cmul(x, [0, 1]))
+				b = cexp(cmul(x, [0, -1]))
+				numer = csub(cexp(cmul(x, [0, 1])), cexp(cmul(x, [0, -1])))
+				return cmul(numer, [0, -0.5])
+			}
+			function ccos(x) {
+				a = cexp(cmul(x, [0, 1]))
+				b = cexp(cmul(x, [0, -1]))
+				numer = cadd(cexp(cmul(x, [0, 1])), cexp(cmul(x, [0, -1])))
+				return cmul(numer, [0.5, 0])
+			}
+			function clog(x) {
+				return [0.5*Math.log(cmag2(x)), Math.atan2(x[1], x[0])]
+			}
+			function cgamma(x) {
+    			p = [676.5203681218851, -1259.1392167224028, 771.3234287776531, -176.6150291621406, 12.507343278686905, -0.13857109526572012, 9.984369578019572e-06, 1.5056327351493116e-07]
+
+			    if (x[0] < 0.5) {
+			        result = cdiv([Math.PI, 0], (cmul(csin(cmul([Math.PI, 0], x)), cgamma(csub([1, 0], x)))))
+			    } else {}
+			        x = csub(x, [1, 0])
+			        y = [0.99999999999980993, 0]
+			        for (var i = 0; i < p.length; i++) {
+			        	y = cadd(y, cdiv([p[i], 0], (cadd(x, [i+1, 0]))))
+			        }
+
+			        t = cadd(x, [p.length - 0.5, 0])
+			        result = cmul([Math.sqrt(2*Math.PI), 0], cmul(ccpow(t, (cadd(x, [0.5, 0]))), cmul(cexp(cneg(t)), y)))
+
+			    return result
+			}
+			var e = [Math.exp(1), 0]
+			f = function(z) {
+				return clog(cgamma(z))
+			}
+			function julia(f, c, iters, escape) {
+				escape2 = escape*escape;
+				for (var i = 0; i < iters; i++) {
+					if (c[0]*c[0]+c[1]*c[1] > escape2) {
+						return i;
+					}
+					c = f(c)
+				}
+				return iters;
+			}
+			f = cgamma
+			function draw(xmin, xmax, ymin, ymax, iters) {
+				var canvas = document.getElementById('canvas');
+				var ctx = canvas.getContext('2d');
+				for (var i = 0; i < canvas.width; i++) {
+					var offset = 0;
+					var img = ctx.createImageData(canvas.width, 1);
+					for (var j = 0; j < canvas.height; j++) {
+						var y = ymin+(ymax-ymin)*i/(canvas.width-1);
+						var x = xmax-(xmax-xmin)*j/(canvas.height-1);
+						var v = julia(f, [x, y], iters, 10000);
+						img.data[offset++] = v * 255/iters;
+						img.data[offset++] = v * 255/iters;
+						img.data[offset++] = v * 255/iters;
+						img.data[offset++] = 255;
+					}
+					ctx.putImageData(img, 0, i);
+				}
+			}
+			coords = [-2, 2, -2, 2]
+			function main() {
+				draw(coords[0], coords[1], coords[2], coords[3], 100);
+			}
+			window.onload = function() {
+				document.getElementById('canvas').addEventListener('click', function (event) {
+					var canvas = document.getElementById('canvas');
+					x = coords[0] + (coords[1]-coords[0])*(canvas.height-event.offsetX)/(canvas.height)
+					y = coords[2] + (coords[3]-coords[2])*event.offsetY/(canvas.width);
+					console.log(x, (coords[1]-coords[0])/4)
+					xdiff = (coords[1]-coords[0])/4
+					coords[0] = x - xdiff
+					coords[1] = x + xdiff
+					ydiff = (coords[3]-coords[2])/4
+					coords[2] = y - ydiff
+					coords[3] = y + ydiff
+					main();
+				})
+			}
+        </script>
+    </head>
+    <body>
+        <input type="button" onclick="main()" value="Say Hello, Johan" />
+        <canvas id="canvas" width=500 height=500 />
+    </body>
+</html>
