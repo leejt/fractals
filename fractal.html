@@ -83,16 +83,17 @@
 				return [(y[0]*x[0]+y[1]*x[1])/mag, (x[1]*y[0]-x[0]*y[1])/mag]
 			}
 			function csin(x) {
-				a = cexp(cmul(x, [0, 1]))
-				b = cexp(cmul(x, [0, -1]))
 				numer = csub(cexp(cmul(x, [0, 1])), cexp(cmul(x, [0, -1])))
 				return cmul(numer, [0, -0.5])
 			}
 			function ccos(x) {
-				a = cexp(cmul(x, [0, 1]))
-				b = cexp(cmul(x, [0, -1]))
 				numer = cadd(cexp(cmul(x, [0, 1])), cexp(cmul(x, [0, -1])))
 				return cmul(numer, [0.5, 0])
+			}
+			function ctan(x) {
+				e2ix = cexp(cmul(x, [0, 2]))
+				return cdiv(cmul([0, -1], cadd([-1, 0], e2ix)), cadd([1, 0], e2ix))
+
 			}
 			function clog(x) {
 				return [0.5*Math.log(cmag2(x)), Math.atan2(x[1], x[0])]
@@ -149,7 +150,7 @@
 				return [ r * 255, g * 255, b * 255 ];
 			}
 			function color1(v) {
-				p = hsv_to_rgb(v, 1.0, v);
+				p = hsv_to_rgb((4*v)%1, 1.0, 1.0);
 				p.push(255)
 				return p
 			}
@@ -170,6 +171,7 @@
 					}
 					points.push(temp);
 				}
+				console.log(low, high)
 				var ctx = canvas.getContext('2d');
 				for (var i = 0; i < canvas.width; i++) {
 					var offset = 0;
@@ -188,24 +190,24 @@
 				}
 			}
 			f = function(z) {
-				return cadd(crpow(csinh(cintpow(z, 2)), 0.5), [0.065, 0.122])
+				return cadd(cintpow(z, 2), [0.285, 0])
 			}
-			coords = [-10, 10, -10, 10]
-			//coords = [0.49835937500000005, 0.502265625, 0.16976562500000014, 0.17367187500000014]
+			coords = [-2, 2, -2, 2]
 			function main() {
 				d = new Date()-0
-				draw(coords[0], coords[1], coords[2], coords[3], 100);
-				console.log(new Date()-d)
+				draw(coords[0], coords[1], coords[2], coords[3], 200);
+				console.log((new Date()-0)-d)
 			}
+			ZOOM_FACTOR = 5
 			window.onload = function() {
 				document.getElementById('canvas').addEventListener('click', function (event) {
 					var canvas = document.getElementById('canvas');
 					x = coords[0] + (coords[1]-coords[0])*event.offsetX/canvas.width;
 					y = coords[2] + (coords[3]-coords[2])*(canvas.height-event.offsetY)/canvas.height
-					xdiff = (coords[1]-coords[0])/4
+					xdiff = (coords[1]-coords[0])/(2*ZOOM_FACTOR)
 					coords[0] = x - xdiff
 					coords[1] = x + xdiff
-					ydiff = (coords[3]-coords[2])/4
+					ydiff = (coords[3]-coords[2])/(2*ZOOM_FACTOR)
 					coords[2] = y - ydiff
 					coords[3] = y + ydiff
 					main();
@@ -215,6 +217,6 @@
     </head>
     <body>
         <input type="button" onclick="main()" value="Say Hello, Johan" />
-        <canvas id="canvas" width=500 height=500 />
+        <canvas id="canvas" width=1000 height=1000 />
     </body>
 </html>
