@@ -1,6 +1,5 @@
 <html>
     <head>
-    	<script type="text/javascript" src="complex.min.js"></script>
         <script type="text/javascript">
 			function mandelbrot(cr, ci, iters) {
 				var zr = 0;
@@ -98,6 +97,9 @@
 			function clog(x) {
 				return [0.5*Math.log(cmag2(x)), Math.atan2(x[1], x[0])]
 			}
+			function csinh(x) {
+				return cmul([0.5, 0], csub(cexp(x), cexp(cneg(x))))
+			}
 			function cgamma(x) {
     			p = [676.5203681218851, -1259.1392167224028, 771.3234287776531, -176.6150291621406, 12.507343278686905, -0.13857109526572012, 9.984369578019572e-06, 1.5056327351493116e-07]
 
@@ -116,9 +118,6 @@
 			    return result
 			}
 			var e = [Math.exp(1), 0]
-			f = function(z) {
-				return clog(cgamma(z))
-			}
 			function julia(f, c, iters, escape) {
 				escape2 = escape*escape;
 				for (var i = 0; i < iters; i++) {
@@ -129,35 +128,80 @@
 				}
 				return iters;
 			}
-			f = cgamma
+			function hsv_to_rgb(h, s, v) {
+				var r, g, b;
+
+				var i = Math.floor(h * 6);
+				var f = h * 6 - i;
+				var p = v * (1 - s);
+				var q = v * (1 - f * s);
+				var t = v * (1 - (1 - f) * s);
+
+				switch (i % 6) {
+					case 0: r = v, g = t, b = p; break;
+					case 1: r = q, g = v, b = p; break;
+					case 2: r = p, g = v, b = t; break;
+					case 3: r = p, g = q, b = v; break;
+					case 4: r = t, g = p, b = v; break;
+					case 5: r = v, g = p, b = q; break;
+				}
+
+				return [ r * 255, g * 255, b * 255 ];
+			}
+			function color1(v) {
+				p = hsv_to_rgb(v, 1.0, v);
+				p.push(255)
+				return p
+			}
 			function draw(xmin, xmax, ymin, ymax, iters) {
 				var canvas = document.getElementById('canvas');
+				var high = 0
+				var low = iters
+				var points = []
+				for (var i = 0; i < canvas.width; i++) {
+					var temp = []
+					for (var j = 0; j < canvas.height; j++) {
+						var y = ymin+(ymax-ymin)*i/(canvas.width-1);
+						var x = xmin+(xmax-xmin)*j/(canvas.height-1);
+						var v = julia(f, [x, y], iters, 10000);
+						temp.push(v);
+						high = Math.max(high, v);
+						low = Math.min(low, v);
+					}
+					points.push(temp);
+				}
 				var ctx = canvas.getContext('2d');
 				for (var i = 0; i < canvas.width; i++) {
 					var offset = 0;
 					var img = ctx.createImageData(canvas.width, 1);
 					for (var j = 0; j < canvas.height; j++) {
-						var y = ymin+(ymax-ymin)*i/(canvas.width-1);
-						var x = xmax-(xmax-xmin)*j/(canvas.height-1);
-						var v = julia(f, [x, y], iters, 10000);
-						img.data[offset++] = v * 255/iters;
-						img.data[offset++] = v * 255/iters;
-						img.data[offset++] = v * 255/iters;
-						img.data[offset++] = 255;
+						var v = points[i][j]
+						v = ((v-low)/(high-low))**(1/3)
+						color = color1(v);
+						//console.log(v, color)
+						img.data[offset++] = color[0]
+						img.data[offset++] = color[1]
+						img.data[offset++] = color[2];
+						img.data[offset++] = color[3];
 					}
-					ctx.putImageData(img, 0, i);
+					ctx.putImageData(img, 0, canvas.height-i-1);
 				}
 			}
-			coords = [-2, 2, -2, 2]
+			f = function(z) {
+				return cadd(crpow(csinh(cintpow(z, 2)), 0.5), [0.065, 0.122])
+			}
+			coords = [-10, 10, -10, 10]
+			//coords = [0.49835937500000005, 0.502265625, 0.16976562500000014, 0.17367187500000014]
 			function main() {
+				d = new Date()-0
 				draw(coords[0], coords[1], coords[2], coords[3], 100);
+				console.log(new Date()-d)
 			}
 			window.onload = function() {
 				document.getElementById('canvas').addEventListener('click', function (event) {
 					var canvas = document.getElementById('canvas');
-					x = coords[0] + (coords[1]-coords[0])*(canvas.height-event.offsetX)/(canvas.height)
-					y = coords[2] + (coords[3]-coords[2])*event.offsetY/(canvas.width);
-					console.log(x, (coords[1]-coords[0])/4)
+					x = coords[0] + (coords[1]-coords[0])*event.offsetX/canvas.width;
+					y = coords[2] + (coords[3]-coords[2])*(canvas.height-event.offsetY)/canvas.height
 					xdiff = (coords[1]-coords[0])/4
 					coords[0] = x - xdiff
 					coords[1] = x + xdiff
