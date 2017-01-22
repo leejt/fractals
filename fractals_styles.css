@@ -1,0 +1,139 @@
+#topmenu {
+	background-color: rgba(180,255,255,0.7);
+	font-family: Calibri, Arial, Helvetica, sans-serif;
+	position: absolute;
+	top: 0px;
+	right: 100px;
+	width: 300px;
+	padding: 0;
+	margin: 0;
+	z-index: 1;
+}
+
+#topmenu h1 {
+	margin-top: 50px;
+	color: rgba(0,0,75,0.75);
+	font-size: 30px;
+}
+
+.header_line {
+	float: left;
+	margin-top: 25px;
+	margin-left: 15px;
+	width: 270px;
+	height: 3px;
+	background-color: rgba(0,0,75,0.5);
+}
+
+.form_line {
+	float: left;
+	margin-top: 25px;
+	margin-left: 15px;
+	width: 270px;
+	height: 2px;
+	background-color: rgba(75,75,150,0.5);
+}
+
+#input{
+	float: left;
+	width: 300px;
+	color: rgba(20,20,20,0.9);
+	font-size: 16px;
+}
+
+.input_element{
+	float: left;
+	text-align: left;
+	margin-top: 5px;
+	width: 285px;
+}
+
+.input_menu_label{
+	float: left;
+	text-align: left;
+	margin-left:15px;
+	width: 135px;
+}
+
+.input_menu_input{
+	float: left;
+	text-align: right;
+	width: 135px;
+}
+
+.input_element_center{
+	font-weight:bold;
+	color: rgba(50,50,50,0.9);
+	margin-top: 25px;
+	float: left;
+	text-align: center;
+	margin-left:15px;
+	width: 270px;
+}
+
+.input_element_center_left{
+	float: left;
+	text-align: left;
+	margin-left:15px;
+	width: 270px;
+}
+
+input[type=radio]{
+	display:none;
+}
+.input_element_center_left .radio_no_select{
+	margin-top: 4px;
+	float: left;
+	width: 12px;
+	height: 12px;
+	background-image: url(../Imagenes/radio-button.png);
+}
+.input_element_center_left .radio_select{
+	margin-top: 4px;
+	float: left;
+	width: 12px;
+	height: 12px;
+	background-image: url(../Imagenes/radio-button.png);
+	background-repeat: no-repeat;
+	background-position: -12px 0px;
+}
+
+.input_menu_input input{
+	text-align: right;
+	border-style: none; 
+	color: rgba(20,20,20,0.9);
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgba(120,185,185,0.7);
+	background-color: rgba(190,255,255,0.7); 
+	padding-right: 3px;
+}
+
+#input_submit_input{
+	margin-top: 15px;
+	float: left;
+	text-align: center;
+	margin-left:15px;
+	width: 270px;
+}
+
+#input_submit_input input{
+	width: 125px;
+	height: 30px;
+	font-weight:bold;
+	text-align: center;
+	border-style: none; 
+	color: rgba(50,50,50,0.9);
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgba(120,120,120,0.7);
+	background-color: rgba(255,255,255,0.7); 
+}
+
+#input_submit_input input:hover{
+	background-color: rgba(200,235,255,0.7); 
+}
+
+#input_submit_input input:active{
+	background-color: rgba(255,255,255,0.7); 
+}

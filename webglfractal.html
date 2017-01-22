@@ -1,0 +1,333 @@
+<html> 
+<head>
+
+<link href="reset.css" rel="stylesheet" type="text/css" />
+<link href="styles.css" rel="stylesheet" type="text/css" />
+
+<style>
+	html, body {
+		width:	100%;
+		height: 100%;
+	}
+	body {
+		background-color: #000000;
+		margin: 0;
+	}
+</style>
+
+</head>
+<body>
+
+<div id="CanvasDiv">
+</div>
+
+<script language="JavaScript" type="text/javascript" src="three.js"></script>
+<script language="JavaScript" type="text/javascript" src="webGLUtils.js"></script>
+
+<link href="fractals_styles.css" rel="stylesheet" type="text/css" />
+
+<script language="JavaScript" type="text/javascript" src="jsep.min.js"></script>
+<script language="JavaScript" type="text/javascript" src="fractals.js"></script>
+
+<div id="topmenu" style="height: 925px">
+	<h1>Julia set Viewer</h1>
+	
+	<div id="input">
+		<form>
+			<div class="header_line"></div>
+			
+			<div class="input_element_center">Shader parameters</div>
+			<div class="input_element">
+				<div class="input_menu_label">Equation:</div>
+				<div class="input_menu_input"><input id="input_equation" type="text" value="z^2-0.8+0.156i" maxlength="1000" size="12"></div>
+			</div>
+			<div class="input_element">
+				<div class="input_menu_label">Num Iterations:</div>
+				<div class="input_menu_input"><input id="input_iterations" type="text" value="100" maxlength="3" size="12"></div>
+			</div>
+			<div class="input_element">
+				<div class="input_menu_label">Color scale:</div>
+				<div class="input_menu_input"><input id="input_color_scale" type="text" value="25" maxlength="3" size="12"></div>
+			</div>
+			<div class="input_element">
+				<div id="input_submit_input"><input id="input_recompile_shader" type="button" value="Update Values"></div>
+			</div>
+			<div class="form_line"></div>
+			
+			<div class="input_element_center">Function parameters</div>
+			<div class="input_element">
+				<div class="input_menu_label">Seed real part:</div>
+				<div class="input_menu_input"><input id="input_seed_real" type="text" value="-0.4" maxlength="10" size="12"></div>
+			</div>
+			<div class="input_element">
+				<div class="input_menu_label">Seed imaginary part:</div>
+				<div class="input_menu_input"><input id="input_seed_imaginary" type="text" value="0.6" maxlength="10" size="12"></div>
+			</div>
+			<div class="input_element">
+				<div class="input_element_center_left"><span id="random_animation" class="radio_no_select"></span>&nbsp;&nbsp;Animate values</div>
+			</div>
+			<div class="form_line"></div>
+			
+			<div class="input_element_center">Color palette</div>
+			<div class="input_element">
+				<div class="input_element_center_left"><span id="palette_1_radio" class="radio_select"></span>&nbsp;&nbsp;Palette 1</div>
+				<div class="input_element_center_left"><span id="palette_2_radio" class="radio_no_select"></span>&nbsp;&nbsp;Palette 2</div>
+				<div class="input_element_center_left"><span id="palette_3_radio" class="radio_no_select"></span>&nbsp;&nbsp;Palette 3</div>
+			</div>
+			<div class="form_line"></div>
+			
+			<div class="input_element_center">Texture</div>
+			<div class="input_element">
+				<div class="input_element_center_left"><span id="texture_filtering" class="radio_no_select"></span>&nbsp;&nbsp;Texture filtering</div>
+			</div>
+			
+			<div class="form_line"></div>
+			
+			<div class="input_element_center">Info</div>
+			<div class="input_element_center_left"><b>Zoom In:</b>   Left click</div>
+			<div class="input_element_center_left"><b>Zoom Out:</b>  Right click</div>
+			<div class="input_element_center_left"><b>Move:</b>      Shift + Left click</div>
+			
+			<div class="form_line"></div>
+			
+			<div class="input_element">
+				<div id="input_submit_input"><input id="make_screenshot" type="button" value="Screenshot"></div>
+			</div>
+		</form>
+	</div>
+	
+</div>
+
+<script id="vertexShader" type="x-shader/x-vertex">
+	void main()	{
+		gl_Position = vec4(position, 1.0);
+	}
+</script>
+
+<script id="fragmentShader" type="x-shader/x-fragment">
+	
+	uniform vec2 minPoint;
+	uniform vec2 spaceArea;
+	uniform vec2 resolution;
+	uniform vec2 seed;
+	uniform sampler2D texture;
+
+	float cmag2(vec2 a) {
+		return a.x*a.x + a.y*a.y;
+	}
+	float cmag2(float a) {
+		return a*a;
+	}
+
+	vec2 cadd(vec2 a, vec2 b) {
+		return vec2(a.x+b.x, a.y+b.y);
+	}
+	vec2 cadd(vec2 a, float b) {
+		return vec2(a.x+b, a.y);
+	}
+	vec2 cadd(float a, vec2 b) {
+		return vec2(a+b.x, b.y);
+	}
+	float cadd(float a, float b) {
+		return a + b;
+	}
+
+	vec2 csub(vec2 a, vec2 b) {
+		return vec2(a.x-b.x, a.y-b.y);
+	}
+	vec2 csub(vec2 a, float b) {
+		return vec2(a.x-b, a.y);
+	}
+	vec2 csub(float a, vec2 b) {
+		return vec2(a-b.x, b.y);
+	}
+	float csub(float a, float b) {
+		return a - b;
+	}
+
+	vec2 cmul(vec2 a, vec2 b) {
+		return vec2(a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x);
+	}
+	vec2 cmul(vec2 a, float b) {
+		return vec2(a.x*b, a.y*b);
+	}
+	vec2 cmul(float a, vec2 b) {
+		return vec2(a*b.x, a*b.y);
+	}
+	float cmul(float a, float b) {
+		return a*b;
+	}
+
+	vec2 cdiv(vec2 a, vec2 b) {
+		float mag = b.x*b.x + b.y*b.y;
+		return vec2((b.x*a.x+b.y*a.y)/mag, (a.y*b.x-a.x*b.y)/mag);
+	}
+	vec2 cdiv(float a, vec2 b) {
+		return cdiv(vec2(a, 0), b);
+	}
+	vec2 cdiv(vec2 a, float b) {
+		return vec2(a.x/b, a.y/b);
+	}
+	float cdiv(float a, float b) {
+		return a/b;
+	}
+
+	vec2 c2(vec2 a) {
+		return vec2(a.x*a.x - a.y*a.y, a.x*a.y + a.y*a.x);
+	}
+	float c2(float a) {
+		return a*a;
+	}
+
+	vec2 c3(vec2 a) {
+		vec2 ans = vec2(a.x*a.x - a.y*a.y, a.x*a.y + a.y*a.x);
+		return vec2(ans.x*a.x - ans.y*a.y, ans.x*a.y + ans.y*a.x);
+	}
+	float c3(float a) {
+		return a*a*a;
+	}
+
+	vec2 cexp(vec2 a) {
+		float ex = exp(a.x);
+		return vec2(cos(a.y)*ex, sin(a.y)*ex);
+	}
+	float cexp(float a) {
+		return exp(a);
+	}
+
+
+	vec2 cpow(vec2 a, vec2 b) {
+		float arg = atan(a.y, a.x);
+		float mag = a.x*a.x + a.y*a.y;
+		float expdarg = exp(-b.y*arg);
+		float magexp = pow(mag, b.x/2.0);
+		float logmag = log(mag)*b.y/2.0;
+		float p1 = expdarg*cos(b.x*arg);
+		float p2 = expdarg*sin(b.x*arg);
+		float q1 = magexp*cos(logmag);
+		float q2 = magexp*sin(logmag);
+	    float real = p1*q1-p2*q2;
+	    float imag = q1*p2+p1*q2;
+	    return vec2(real, imag);
+	}
+	vec2 cpow(float a, vec2 b) {
+		float log = log(a);
+		float ex = exp(b.x*log);
+		return vec2(ex*cos(b.y*log), ex*sin(b.y)*log);
+	}
+	vec2 cpow(vec2 a, float b) {
+		float arg = atan(a.y, a.x);
+		float mag = a.x*a.x + a.y*a.y;
+		float magexp = pow(mag, b/2.0);
+		float p1 = cos(b*arg);
+		float p2 = sin(b*arg);
+		return vec2(p1*magexp, p2*magexp);
+	}
+	vec2 cpow(float a, float b) {
+		return vec2(pow(a, b), 0);
+	}
+
+	vec2 csin(vec2 a) {
+		vec2 numer = cexp(cmul(a, vec2(0, 1))) - cexp(cmul(a, vec2(0, -1)));
+		return cmul(numer, vec2(0, -0.5));
+	}
+	float csin(float a) {
+		return sin(a);
+	}
+
+	vec2 ccos(vec2 a) {
+		vec2 numer = cexp(cmul(a, vec2(0, 1))) + cexp(cmul(a, vec2(0, -1)));
+		return cmul(numer, vec2(0.5, 0));
+	}
+	float ccos(float a) {
+		return cos(a);
+	}
+
+	vec2 ctan(vec2 a) {
+		vec2 e2ix = cexp(cmul(a, vec2(0, 2)));
+		return cdiv(cmul(vec2(0, -1), vec2(-1, 0) + e2ix), vec2(1, 0) + e2ix);
+	}
+	float ctan(float a) {
+		return tan(a);
+	}
+
+	vec2 clog(vec2 a) {
+		return vec2(0.5*log(cmag2(a)), atan(a.y, a.x));
+	}
+	float clog(float a) {
+		return log(a);
+	}
+
+	vec2 csinh(vec2 a) {
+		return cmul(vec2(0.5, 0), cexp(a) - cexp(-a));
+	}
+	float csinh(float a) {
+		return (exp(a)-exp(-a))/2.0;
+	}
+
+	float pi = 3.1415926535897932384626433832795;
+
+	vec2 cgamma_helper(vec2 a) {
+		a = a - vec2(1, 0);
+
+		vec2 y = vec2(0.99999999999980993, 0);
+		y = y + cdiv(vec2(676.5203681218851, 0), (a + vec2(1, 0)));
+		y = y + cdiv(vec2(-1259.1392167224028, 0), (a + vec2(2, 0)));
+		y = y + cdiv(vec2(771.3234287776531, 0), (a + vec2(3, 0)));
+		y = y + cdiv(vec2(-176.6150291621406, 0), (a + vec2(4, 0)));
+		y = y + cdiv(vec2(12.507343278686905, 0), (a + vec2(5, 0)));
+		y = y + cdiv(vec2(-0.13857109526572012, 0), (a + vec2(6, 0)));
+		y = y + cdiv(vec2(9.984369578019572e-06, 0), (a + vec2(7, 0)));
+		y = y + cdiv(vec2(1.5056327351493116e-07, 0), (a + vec2(8, 0)));
+		vec2 t = a + vec2(8.0-0.5, 0);
+		return cmul(vec2(sqrt(2.0*pi), 0), cmul(cpow(t, (a + vec2(0.5, 0))), cmul(cexp(-t), y)));
+	}
+
+	vec2 cgamma(vec2 a) {
+		float result = 0.0;
+		if (a.x < 0.5) {
+			return cdiv(vec2(pi, 0), (cmul(csin(cmul(vec2(pi, 0), a)), cgamma_helper(vec2(1, 0) - a))));
+		}
+		a = a - vec2(1, 0);
+
+		vec2 y = vec2(0.99999999999980993, 0);
+		y = y + cdiv(vec2(676.5203681218851, 0), (a + vec2(1, 0)));
+		y = y + cdiv(vec2(-1259.1392167224028, 0), (a + vec2(2, 0)));
+		y = y + cdiv(vec2(771.3234287776531, 0), (a + vec2(3, 0)));
+		y = y + cdiv(vec2(-176.6150291621406, 0), (a + vec2(4, 0)));
+		y = y + cdiv(vec2(12.507343278686905, 0), (a + vec2(5, 0)));
+		y = y + cdiv(vec2(-0.13857109526572012, 0), (a + vec2(6, 0)));
+		y = y + cdiv(vec2(9.984369578019572e-06, 0), (a + vec2(7, 0)));
+		y = y + cdiv(vec2(1.5056327351493116e-07, 0), (a + vec2(8, 0)));
+		vec2 t = a + vec2(8.0-0.5, 0);
+		return cmul(vec2(sqrt(2.0*pi), 0), cmul(cpow(t, (a + vec2(0.5, 0))), cmul(cexp(-t), y)));
+	}
+	float cgamma(float a) {
+		return cgamma(vec2(a, 0)).x;
+	}
+
+	void main()	{
+		vec2 p = gl_FragCoord.xy/resolution.xy;
+		p = (p*spaceArea)+minPoint;
+		float iteration = 0.0;
+		vec2 z = vec2(p.x, p.y);
+		
+		for(int i = 0; i < int(MAX_ITERATIONS); i++)
+		{
+			if(cmag2(z) < 10000.0){
+				z = $INSERT$;
+				iteration++;
+			}
+		}
+		
+		if (iteration < MAX_ITERATIONS) {
+			iteration = iteration /(INTERVALAS_PER_COLOR*NUM_COLORS);
+			gl_FragColor = texture2D(texture, vec2(iteration, 0.5));		
+		}else{
+			gl_FragColor = vec4(0.0,0.0,0.0,1.0);
+		}
+	}
+</script>
+
+</body>
+</html>
