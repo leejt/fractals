@@ -58,9 +58,9 @@ funcs.gamma = ['cgamma', 1];
 function parseEquation(eq) {
 	if (eq.type == 'Literal') {
 		if (eq.imag) {
-			return `vec2(0, ${eq.value})`;
+			return `vec2(0, ${eq.value.toFixed(1)})`;
 		}
-		return eq.value.toString();
+		return eq.value.toFixed(1);
 	}
 	if (eq.type == 'Identifier') {
 		if (eq.name != 'z') {
@@ -266,7 +266,7 @@ function onEquationChanged()
 function onIterationsChanged()
 {
 	var newValue = parseInt(document.getElementById('input_iterations').value);
-	if(newValue == NaN || newValue < 10 || newValue > 400){
+	if(newValue == NaN){
 		newValue = currentNumIterations;
 	}
 	currentNumIterations = newValue;
