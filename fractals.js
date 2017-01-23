@@ -6,7 +6,7 @@ var mouseLatsPos = {
 		"x" : 0.0,
 		"y" : 0.0
 	};
-var currentEquation = 'z^2-0.8+0.156i';
+var currentEquation = 'exp(z^3)';
 var currentNumIterations = 100.0;
 var currentColorScale = 25.0;
 var numTextureColors = 4;
@@ -217,6 +217,8 @@ function onRandomAnimationClick(){
 	randomAnimation = !randomAnimation;
 	
 	if(randomAnimation){
+		currentRealSeed = 0.0;
+		currentImaginarySeed = 0.0;
 		animationValues.x = Math.random();
 		animationValues.x = ((animationValues.x*2.0)-1.0)*0.001;
 		animationValues.y = ((Math.random()*2.0)-1.0)*0.001;
