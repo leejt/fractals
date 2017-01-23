@@ -122,6 +122,7 @@ function parseEquation(eq) {
 		name = funcs[name][0];
 		return `${name}(${arguments.join(', ')})`;
 	}
+	throw new Error("Parsing error: couldn't recognize the equation. Make sure to have operators between things!")
 }
 function generateTexture(){
 	
