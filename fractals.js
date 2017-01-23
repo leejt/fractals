@@ -266,6 +266,7 @@ function texFiltering(){
 function onEquationChanged()
 {
 	currentEquation = document.getElementById('input_equation').value;
+	console.log(uniforms)
 };
 
 function onIterationsChanged()
@@ -315,8 +316,8 @@ _initFunction = function(web3DApp)
 	currAR = web3DApp.winHeight/web3DApp.winWidth;
 	uniforms.resolution.value.x = web3DApp.winWidth;
 	uniforms.resolution.value.y = web3DApp.winHeight;
-	uniforms.seed.value.x = -0.4;
-	uniforms.seed.value.y = 0.6;
+	uniforms.seed.value.x = currentRealSeed;
+	uniforms.seed.value.y = currentImaginarySeed;
 
 	material = new THREE.ShaderMaterial( {
 		uniforms: uniforms,
@@ -375,7 +376,7 @@ _updateFunction = function(web3DApp)
 	}
 	
 	if(randomAnimation){
-		elapsed = elapsed*0.001;
+		elapsed = elapsed*0.1;
 		currentRealSeed += animationValues.x * elapsed;
 		currentImaginarySeed += animationValues.y * elapsed;
 		
