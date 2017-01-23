@@ -19,8 +19,8 @@ var currentDesp = {
 		"x" : 0.0,
 		"y" : 0.0
 	};
-var currentRealSeed = -0.4;
-var currentImaginarySeed = 0.6;
+var currentRealSeed = 0.0;
+var currentImaginarySeed = 0.0;
 var randomAnimation = false;
 var animationValues = {
 		"x" : 0.0,
@@ -47,8 +47,10 @@ function screenshot(){
 jsep.removeBinaryOp('^');
 jsep.addBinaryOp('^', 11);
 jsep.addLiteral('e', Math.exp(1));
+jsep.addLiteral('i', 'i')
 var e_val = Math.exp(1).toString();
 funcs = {};
+funcs.exp = ['cexp', 1]
 funcs.log = ['clog', 1];
 funcs.sin = ['csin', 1];
 funcs.cos = ['ccos', 1];
@@ -59,6 +61,9 @@ function parseEquation(eq) {
 	if (eq.type == 'Literal') {
 		if (eq.imag) {
 			return `vec2(0, ${eq.value.toFixed(1)})`;
+		}
+		if (eq.value == 'i') {
+			return 'vec2(0, 1)';
 		}
 		return eq.value.toFixed(1);
 	}

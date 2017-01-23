@@ -86,14 +86,14 @@ input[type=radio]{
 	float: left;
 	width: 12px;
 	height: 12px;
-	background-image: url(../Imagenes/radio-button.png);
+	background-image: url(radio-button.png);
 }
 .input_element_center_left .radio_select{
 	margin-top: 4px;
 	float: left;
 	width: 12px;
 	height: 12px;
-	background-image: url(../Imagenes/radio-button.png);
+	background-image: url(radio-button.png);
 	background-repeat: no-repeat;
 	background-position: -12px 0px;
 }
