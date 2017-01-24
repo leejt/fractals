@@ -8,6 +8,7 @@ var mouseLatsPos = {
 	};
 var currentEquation = 'exp(z^3)';
 var currentNumIterations = 100.0;
+var currentEscape = 10000.0;
 var currentColorScale = 25.0;
 var numTextureColors = 4;
 var textureSize = 256;
@@ -141,47 +142,40 @@ function parseEquation(eq) {
 }
 function generateTexture(){
 	
-	var colorTable;
-	if(currentPalette == 1){
-		colorTable= [0.0, 0.392156862745098, 0.0, 1.0, 
-					 0.3450980392156863, 0.7372549019607844, 0.0, 1.0,
-					 1.0, 0.8862745098039215, 0.0, 1.0,
-					 1.0, 0.4, 0.0, 1.0];
-	}else if(currentPalette == 2){
-		colorTable= [0.0, 0.1, 0.0, 1.0, 
-					 0.5, 0.2, 0.0, 1.0,
-					 1.0, 0.5, 0.0, 1.0,
-					 1.0, 0.0, 0.0, 1.0];
-	}else if(currentPalette == 3){
-		colorTable= [0.0, 0.05, 0.5, 1.0, 
-					 0.75, 1.0, 1.0, 1.0,
-					 1.0, 0.75, 0.1, 1.0,
-					 0.35, 0.0, 0.35, 1.0];
-	}
+	var colorTable = 
+	[[0/6, [1, 0, 0, 1.0]],
+	[1/6, [1, 1, 0.1, 1.0]],
+	[2/6, [0, 1, 0, 1.0]],
+	[3/6, [0, 1, 1, 1.0]],
+	[4/6, [0, 0, 1, 1.0]],
+	[5/6, [1, 0, 1, 1.0]],
+	[6/6, [1, 0, 0, 1.0]]];
+
 		
 	var canvas = document.createElement( 'canvas' );
 	canvas.width = textureSize;
-	canvas.height = 1;
+	canvas.height = 500;
 	var context = canvas.getContext('2d');
-	var chunkSize = textureSize/numTextureColors;
+	var index = 0;
 	for( var x = 0; x < textureSize; x++ ){
-		
-		var index = Math.floor(x/chunkSize)%numTextureColors;
-		var percent = (x/chunkSize)%1;
-		var color1 = [colorTable[index*4], colorTable[(index*4)+1], colorTable[(index*4)+2], colorTable[(index*4)+3]];
-		index = (index+1)%numTextureColors;
-		var color2 = [colorTable[index*4], colorTable[(index*4)+1], colorTable[(index*4)+2], colorTable[(index*4)+3]];
+		var percent = x / textureSize;
+		while (percent > colorTable[index+1][0]) {
+			index++;
+		}
+		var color1 = colorTable[index][1]
+		var color2 = colorTable[index+1][1]
+		var diff = (percent-colorTable[index][0])/(colorTable[index+1][0]-colorTable[index][0]);
 		var finalColor = [
-			((color1[0]*(1.0-percent)) + (color2[0]*percent))*255.0, 
-			((color1[1]*(1.0-percent)) + (color2[1]*percent))*255.0, 
-			((color1[2]*(1.0-percent)) + (color2[2]*percent))*255.0, 
-			((color1[3]*(1.0-percent)) + (color2[3]*percent))];
+			((color1[0]*(1.0-diff)) + (color2[0]*diff))*255.0, 
+			((color1[1]*(1.0-diff)) + (color2[1]*diff))*255.0, 
+			((color1[2]*(1.0-diff)) + (color2[2]*diff))*255.0, 
+			((color1[3]*(1.0-diff)) + (color2[3]*diff))];
 		var colorStr = 'rgba(' + Math.floor(finalColor[0]).toString() + ',' 
 				+ Math.floor(finalColor[1]).toString() + ','
 				+ Math.floor(finalColor[2]).toString() + ','
 				+ finalColor[3].toFixed(2).toString()  + ')';
 		context.fillStyle = colorStr;
-		context.fillRect( x, 0, 1, 1 );
+		context.fillRect(x, 0, 1, 500);
 	}
 	
 	texture = new THREE.Texture(canvas);
@@ -192,7 +186,6 @@ function generateTexture(){
 		texture.minFilter = THREE.NearestFilter;
 	}
 	texture.needsUpdate = true;
-	
 	return texture;
 }
 
@@ -201,49 +194,12 @@ function updateValues(){
 	needsTime = false;
 	rands = {};
 	parsedEquation = parseEquation(jsep(currentEquation));
-	material.fragmentShader = "#define MAX_ITERATIONS " + currentNumIterations.toFixed(1).toString() + "\n #define INTERVALAS_PER_COLOR " 
-		+ currentColorScale.toFixed(1).toString() + "\n #define NUM_COLORS " + numTextureColors.toFixed(1).toString() 
+	material.fragmentShader = "#define MAX_ITERATIONS " + currentNumIterations.toFixed(1)+ "\n #define ESCAPE_RADIUS " 
+		+ currentEscape.toFixed(1) + "\n #define INTERVALAS_PER_COLOR " 
+		+ currentColorScale.toFixed(1).toString() + "\n #define NUM_COLORS " + numTextureColors.toFixed(1) 
 		+ "\n " + document.getElementById('fragmentShader').textContent.replace("$INSERT$", parsedEquation);
 	material.needsUpdate = true;
 	
-	renderImage(storedWeb3DApp);
-}
-
-function palette1Sel(){
-	document.getElementById('palette_1_radio').className = "radio_select";
-	document.getElementById('palette_2_radio').className = "radio_no_select";
-	document.getElementById('palette_3_radio').className = "radio_no_select";
-	currentPalette = 1;
-	uniforms.texture.value = generateTexture();
-	renderImage(storedWeb3DApp);
-}
-
-function palette2Sel(){
-	document.getElementById('palette_1_radio').className = "radio_no_select";
-	document.getElementById('palette_2_radio').className = "radio_select";
-	document.getElementById('palette_3_radio').className = "radio_no_select";
-	currentPalette = 2;
-	uniforms.texture.value = generateTexture();
-	renderImage(storedWeb3DApp);
-}
-
-function palette3Sel(){
-	document.getElementById('palette_1_radio').className = "radio_no_select";
-	document.getElementById('palette_2_radio').className = "radio_no_select";
-	document.getElementById('palette_3_radio').className = "radio_select";
-	currentPalette = 3;
-	uniforms.texture.value = generateTexture();
-	renderImage(storedWeb3DApp);
-}
-
-function texFiltering(){
-	currentTextureFiltering = !currentTextureFiltering;
-	if(currentTextureFiltering){
-		document.getElementById('texture_filtering').className = "radio_select";
-	}else{
-		document.getElementById('texture_filtering').className = "radio_no_select";
-	}
-	uniforms.texture.value = generateTexture();
 	renderImage(storedWeb3DApp);
 }
 
@@ -260,6 +216,16 @@ function onIterationsChanged()
 	}
 	currentNumIterations = newValue;
 	document.getElementById('input_iterations').value = currentNumIterations.toString();
+};
+
+function onEscapeChanged()
+{
+	var newValue = parseInt(document.getElementById('input_escape').value);
+	if(newValue == NaN){
+		newValue = currentEscape;
+	}
+	currentEscape = newValue;
+	document.getElementById('input_escape').value = currentEscape.toString();
 };
 
 function onColorScaleChanged(event)
@@ -304,7 +270,7 @@ _initFunction = function(web3DApp)
 	material = new THREE.ShaderMaterial( {
 		uniforms: uniforms,
 		vertexShader: document.getElementById('vertexShader').textContent,
-		fragmentShader: "#define MAX_ITERATIONS 100.0\n #define INTERVALAS_PER_COLOR 25.0\n #define NUM_COLORS 4.0\n " 
+		fragmentShader: "#define MAX_ITERATIONS 100.0\n#define ESCAPE_RADIUS 10000.0\n#define INTERVALAS_PER_COLOR 25.0\n #define NUM_COLORS 4.0\n " 
 			+ document.getElementById('fragmentShader').textContent.replace("$INSERT$", parseEquation(jsep(currentEquation)))
 	} );
 
@@ -317,12 +283,9 @@ _initFunction = function(web3DApp)
 
 	document.getElementById('input_equation').addEventListener('blur', onEquationChanged, false);
 	document.getElementById('input_iterations').addEventListener('blur', onIterationsChanged, false);
+	document.getElementById('input_escape').addEventListener('blur', onEscapeChanged, false);
 	document.getElementById('input_color_scale').addEventListener('blur', onColorScaleChanged, false);
-	document.getElementById('palette_1_radio').addEventListener('click', palette1Sel, false);
-	document.getElementById('palette_2_radio').addEventListener('click', palette2Sel, false);
-	document.getElementById('palette_3_radio').addEventListener('click', palette3Sel, false);
 	document.getElementById('input_recompile_shader').addEventListener('click', updateValues, false);
-	document.getElementById('texture_filtering').addEventListener('click', texFiltering, false);
 	document.getElementById('make_screenshot').addEventListener('click', screenshot, false);
 	
 	renderImage(web3DApp);
