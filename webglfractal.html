@@ -39,11 +39,11 @@
 			<div class="input_element_center">Shader parameters</div>
 			<div class="input_element">
 				<div class="input_menu_label">Equation:</div>
-				<div class="input_menu_input"><input id="input_equation" type="text" value="z^2-0.8+0.156i" maxlength="1000" size="12"></div>
+				<div class="input_menu_input"><input id="input_equation" type="text" value="exp(z^3)" maxlength="1000" size="12"></div>
 			</div>
 			<div class="input_element">
 				<div class="input_menu_label">Num Iterations:</div>
-				<div class="input_menu_input"><input id="input_iterations" type="text" value="100" maxlength="" size="12"></div>
+				<div class="input_menu_input"><input id="input_iterations" type="text" value="100" maxlength="4" size="12"></div>
 			</div>
 			<div class="input_element">
 				<div class="input_menu_label">Color scale:</div>
@@ -54,25 +54,11 @@
 			</div>
 			<div class="form_line"></div>
 			
-			<div class="input_element_center">Function parameters</div>
-			<div class="input_element">
-				<div class="input_menu_label">Seed real part:</div>
-				<div class="input_menu_input"><input id="input_seed_real" type="text" value="0.0" maxlength="10" size="12"></div>
-			</div>
-			<div class="input_element">
-				<div class="input_menu_label">Seed imaginary part:</div>
-				<div class="input_menu_input"><input id="input_seed_imaginary" type="text" value="0.0" maxlength="10" size="12"></div>
-			</div>
-			<div class="input_element">
-				<div class="input_element_center_left"><span id="random_animation" class="radio_no_select"></span>&nbsp;&nbsp;Animate values</div>
-			</div>
-			<div class="form_line"></div>
-			
 			<div class="input_element_center">Color palette</div>
 			<div class="input_element">
-				<div class="input_element_center_left"><span id="palette_1_radio" class="radio_select"></span>&nbsp;&nbsp;Palette 1</div>
+				<div class="input_element_center_left"><span id="palette_1_radio" class="radio_no_select"></span>&nbsp;&nbsp;Palette 1</div>
 				<div class="input_element_center_left"><span id="palette_2_radio" class="radio_no_select"></span>&nbsp;&nbsp;Palette 2</div>
-				<div class="input_element_center_left"><span id="palette_3_radio" class="radio_no_select"></span>&nbsp;&nbsp;Palette 3</div>
+				<div class="input_element_center_left"><span id="palette_3_radio" class="radio_select"></span>&nbsp;&nbsp;Palette 3</div>
 			</div>
 			<div class="form_line"></div>
 			
@@ -109,7 +95,7 @@
 	uniform vec2 minPoint;
 	uniform vec2 spaceArea;
 	uniform vec2 resolution;
-	uniform vec2 seed;
+	uniform float t;
 	uniform sampler2D texture;
 
 	float cmag2(vec2 a) {
@@ -314,8 +300,8 @@
 		
 		for(int i = 0; i < int(MAX_ITERATIONS); i++)
 		{
-			if(cmag2(z) < 10000.0){
-				z = $INSERT$ + seed;
+			if(cmag2(z) < 100000000.0){
+				z = $INSERT$;
 				iteration++;
 			} else {
 				break;
@@ -325,7 +311,7 @@
 		if (iteration < MAX_ITERATIONS) {
 			iteration = iteration /(INTERVALAS_PER_COLOR*NUM_COLORS);
 			gl_FragColor = texture2D(texture, vec2(iteration, 0.5));		
-		}else{
+		} else {
 			gl_FragColor = vec4(0.0,0.0,0.0,1.0);
 		}
 	}

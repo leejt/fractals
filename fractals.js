@@ -11,7 +11,7 @@ var currentNumIterations = 100.0;
 var currentColorScale = 25.0;
 var numTextureColors = 4;
 var textureSize = 256;
-var currentPalette = 1;
+var currentPalette = 3;
 var currentTextureFiltering = false;
 var currAR = 1.0;
 var currentZoom = 3.5;
@@ -19,13 +19,8 @@ var currentDesp = {
 		"x" : 0.0,
 		"y" : 0.0
 	};
-var currentRealSeed = 0.0;
-var currentImaginarySeed = 0.0;
-var randomAnimation = false;
-var animationValues = {
-		"x" : 0.0,
-		"y" : 0.0
-	};
+var time = 0;
+var needsTime = 0;
 
 var storedWeb3DApp;
 
@@ -65,11 +60,14 @@ function parseEquation(eq) {
 		if (eq.value == 'i') {
 			return 'vec2(0, 1)';
 		}
-		return eq.value.toFixed(1);
+		return eq.value.toFixed(20);
 	}
 	if (eq.type == 'Identifier') {
-		if (eq.name != 'z' && eq.name != 'c') {
-			throw new Error(`Translation error: variable must be z or c (got ${eq.name})`)
+		if (eq.name != 'z' && eq.name != 'c' && eq.name != 't') {
+			throw new Error(`Translation error: variable must be z, c or t (got ${eq.name})`)
+		}
+		if (eq.name == 't') {
+			needsTime = true;
 		}
 		return eq.name
 	}
@@ -182,50 +180,15 @@ function generateTexture(){
 }
 
 function updateValues(){
+	time = 0.0;
+	needsTime = false;
+	parsedEquation = parseEquation(jsep(currentEquation));
 	material.fragmentShader = "#define MAX_ITERATIONS " + currentNumIterations.toFixed(1).toString() + "\n #define INTERVALAS_PER_COLOR " 
 		+ currentColorScale.toFixed(1).toString() + "\n #define NUM_COLORS " + numTextureColors.toFixed(1).toString() 
-		+ "\n " + document.getElementById('fragmentShader').textContent.replace("$INSERT$", parseEquation(jsep(currentEquation)));
+		+ "\n " + document.getElementById('fragmentShader').textContent.replace("$INSERT$", parsedEquation);
 	material.needsUpdate = true;
 	
 	renderImage(storedWeb3DApp);
-}
-
-function realNumberChanged(){
-	var newValue = parseFloat(document.getElementById('input_seed_real').value);
-	if(newValue == NaN){
-		newValue = currentRealSeed;
-	}
-	currentRealSeed = newValue;
-	document.getElementById('input_seed_real').value = currentRealSeed.toString();
-	uniforms.seed.value.x = currentRealSeed;
-	renderImage(storedWeb3DApp);
-}
-
-function imaginaryNumberChanged(){
-	var newValue = parseFloat(document.getElementById('input_seed_imaginary').value);
-	if(newValue == NaN){
-		newValue = currentImaginarySeed;
-	}
-	currentImaginarySeed = newValue;
-	document.getElementById('input_seed_imaginary').value = currentImaginarySeed.toString();
-	uniforms.seed.value.y = currentImaginarySeed;
-	renderImage(storedWeb3DApp);
-}
-
-
-function onRandomAnimationClick(){
-	randomAnimation = !randomAnimation;
-	
-	if(randomAnimation){
-		currentRealSeed = 0.0;
-		currentImaginarySeed = 0.0;
-		animationValues.x = Math.random();
-		animationValues.x = ((animationValues.x*2.0)-1.0)*0.001;
-		animationValues.y = ((Math.random()*2.0)-1.0)*0.001;
-		document.getElementById('random_animation').className = "radio_select";
-	}else{
-		document.getElementById('random_animation').className = "radio_no_select";
-	}
 }
 
 function palette1Sel(){
@@ -309,7 +272,7 @@ _initFunction = function(web3DApp)
 		minPoint: {type: "v2", value: new THREE.Vector2()},
 		spaceArea: {type: "v2", value: new THREE.Vector2()},
 		resolution: {type: "v2", value: new THREE.Vector2()},
-		seed: {type: "v2", value: new THREE.Vector2()},
+		t: {type: "f", value: 0.0},
 		texture: {type: "t", value: generateTexture()}
 	};
 	
@@ -318,8 +281,7 @@ _initFunction = function(web3DApp)
 	currAR = web3DApp.winHeight/web3DApp.winWidth;
 	uniforms.resolution.value.x = web3DApp.winWidth;
 	uniforms.resolution.value.y = web3DApp.winHeight;
-	uniforms.seed.value.x = currentRealSeed;
-	uniforms.seed.value.y = currentImaginarySeed;
+	uniforms.t.value = time;
 
 	material = new THREE.ShaderMaterial( {
 		uniforms: uniforms,
@@ -345,21 +307,6 @@ _initFunction = function(web3DApp)
 	document.getElementById('texture_filtering').addEventListener('click', texFiltering, false);
 	document.getElementById('make_screenshot').addEventListener('click', screenshot, false);
 	
-	var inputRealSeed = document.getElementById('input_seed_real');
-	if(inputRealSeed != undefined){
-		inputRealSeed.addEventListener('blur', realNumberChanged, false);
-	}
-	
-	var inputImaginarySeed = document.getElementById('input_seed_imaginary');
-	if(inputImaginarySeed != undefined){
-		inputImaginarySeed.addEventListener('blur', imaginaryNumberChanged, false);
-	}
-	
-	var animateSeed = document.getElementById('random_animation');
-	if(animateSeed != undefined){
-		animateSeed.addEventListener('click', onRandomAnimationClick, false);
-	}
-	
 	renderImage(web3DApp);
 };
 
@@ -377,19 +324,12 @@ _updateFunction = function(web3DApp)
 		zoomAcc = currentZoom / 1000.0;
 	}
 	
-	if(randomAnimation){
-		elapsed = elapsed*0.1;
-		currentRealSeed += animationValues.x * elapsed;
-		currentImaginarySeed += animationValues.y * elapsed;
-		
-		document.getElementById('input_seed_real').value = currentRealSeed.toString();
-		document.getElementById('input_seed_imaginary').value = currentImaginarySeed.toString();
-		
-		uniforms.seed.value.x = currentRealSeed;
-		uniforms.seed.value.y = currentImaginarySeed;
+	if(needsTime){
+		time += elapsed/1000.0;	
+		uniforms.t.value = time;
 	}
 	
-	if(zoomIn || zoomOut || desplacement || randomAnimation){
+	if(zoomIn || zoomOut || desplacement || needsTime){
 		renderImage(web3DApp);
 	}
 };
