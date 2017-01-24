@@ -25,6 +25,8 @@
 <script language="JavaScript" type="text/javascript" src="webGLUtils.js"></script>
 
 <link href="fractals_styles.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
 
 <script language="JavaScript" type="text/javascript" src="jsep.min.js"></script>
 <script language="JavaScript" type="text/javascript" src="fractals.js"></script>
@@ -57,7 +59,19 @@
 				<div id="input_submit_input"><input id="input_recompile_shader" type="button" value="Update Values"></div>
 			</div>
 			<div class="form_line"></div>
-			
+			<div class="input_element_center">Equation parameters</div>
+			<div class="input_element">
+				<div class="input_menu_label" style="float: left; width: 39px;">Time:</div>
+				<div class="input_menu_label" style="float: right; width: 158px; text-align: right;">
+					<button id="input_timeset">set</button>
+					<button id="input_playpause"><i id="playpause_icon" class="fa fa-pause"></i></button>
+					<button id="input_rewind"><i class="fa fa-history"></i></button>
+				</div>
+				<div class="input_menu_input" style="overflow: hidden; width: 58px;">
+					<input id="input_time" type="text" value="0.0" maxlength="1000" size="12" style="width: 100%;">
+				</div>
+			</div>
+			<div class="form_line"></div>
 			<div class="input_element">
 				<div id="input_submit_input"><input id="make_screenshot" type="button" value="Screenshot"></div>
 			</div>

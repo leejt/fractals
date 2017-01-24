@@ -21,7 +21,9 @@ var currentDesp = {
 		"y" : 0.0
 	};
 var time = 0;
-var needsTime = 0;
+var needsTime = false;
+var playing = true;
+var oneOff = false;
 var rands = {};
 
 var storedWeb3DApp;
@@ -144,7 +146,7 @@ function generateTexture(){
 	
 	var colorTable = 
 	[[0/6, [1, 0, 0, 1.0]],
-	[1/6, [1, 1, 0.1, 1.0]],
+	[1/6, [1, 1, 0, 1.0]],
 	[2/6, [0, 1, 0, 1.0]],
 	[3/6, [0, 1, 1, 1.0]],
 	[4/6, [0, 0, 1, 1.0]],
@@ -154,7 +156,7 @@ function generateTexture(){
 		
 	var canvas = document.createElement( 'canvas' );
 	canvas.width = textureSize;
-	canvas.height = 500;
+	canvas.height = 1;
 	var context = canvas.getContext('2d');
 	var index = 0;
 	for( var x = 0; x < textureSize; x++ ){
@@ -175,7 +177,7 @@ function generateTexture(){
 				+ Math.floor(finalColor[2]).toString() + ','
 				+ finalColor[3].toFixed(2).toString()  + ')';
 		context.fillStyle = colorStr;
-		context.fillRect(x, 0, 1, 500);
+		context.fillRect(x, 0, 1, 1);
 	}
 	
 	texture = new THREE.Texture(canvas);
@@ -191,6 +193,7 @@ function generateTexture(){
 
 function updateValues(){
 	time = 0.0;
+	document.getElementById('input_time').value = time.toFixed(3);
 	needsTime = false;
 	rands = {};
 	parsedEquation = parseEquation(jsep(currentEquation));
@@ -237,6 +240,31 @@ function onColorScaleChanged(event)
 	currentColorScale = newValue;
 	document.getElementById('input_color_scale').value = currentColorScale.toString();
 };
+
+function onPlayPause(event) {
+	playing = !playing;
+	icon = playing ? 'pause' : 'play';
+	document.getElementById("playpause_icon").className = "fa fa-" + icon;
+	event.preventDefault();
+}
+
+function onRewind(event) {
+	time -= 1;
+	document.getElementById('input_time').value = time.toFixed(3);
+	oneOff = true;
+	event.preventDefault();
+}
+
+function onTimeSet(event) {
+	var newValue = parseInt(document.getElementById('input_time').value);
+	if(newValue == NaN){
+		newValue = time;
+	}
+	time = newValue;
+	document.getElementById('input_time').value = time.toFixed(3);
+	oneOff = true;
+	event.preventDefault();
+}
 
 function checkHeihgt()
 {
@@ -286,6 +314,9 @@ _initFunction = function(web3DApp)
 	document.getElementById('input_escape').addEventListener('blur', onEscapeChanged, false);
 	document.getElementById('input_color_scale').addEventListener('blur', onColorScaleChanged, false);
 	document.getElementById('input_recompile_shader').addEventListener('click', updateValues, false);
+	document.getElementById('input_playpause').addEventListener('click', onPlayPause, false);
+	document.getElementById('input_rewind').addEventListener('click', onRewind, false);
+	document.getElementById('input_timeset').addEventListener('click', onTimeSet, false);
 	document.getElementById('make_screenshot').addEventListener('click', screenshot, false);
 	
 	renderImage(web3DApp);
@@ -305,13 +336,15 @@ _updateFunction = function(web3DApp)
 		zoomAcc = currentZoom / 1000.0;
 	}
 	
-	if(needsTime){
-		time += elapsed/1000.0;	
-		uniforms.t.value = time;
+	if (needsTime && playing) {
+		time += elapsed/1000.0;
+		document.getElementById('input_time').value = time.toFixed(3);
 	}
+	uniforms.t.value = time;
 	
-	if(zoomIn || zoomOut || desplacement || needsTime){
+	if (zoomIn || zoomOut || desplacement || (needsTime && playing) || oneOff) {
 		renderImage(web3DApp);
+		oneOff = false;
 	}
 };
 
