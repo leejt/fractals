@@ -50,8 +50,15 @@ funcs.log = ['clog', 1];
 funcs.sin = ['csin', 1];
 funcs.cos = ['ccos', 1];
 funcs.tan = ['ctan', 1];
+funcs.csc = ['ccsc', 1];
+funcs.sec = ['csec', 1];
+funcs.cot = ['ccot', 1];
 funcs.sinh = ['csinh', 1];
+funcs.cosh = ['ccosh', 1];
+funcs.tanh = ['ctanh', 1];
 funcs.gamma = ['cgamma', 1];
+funcs.digamma = ['cdigamma', 1];
+
 function parseEquation(eq) {
 	if (eq.type == 'Literal') {
 		if (eq.imag) {
