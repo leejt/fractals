@@ -21,6 +21,7 @@ var currentDesp = {
 	};
 var time = 0;
 var needsTime = 0;
+var rands = {};
 
 var storedWeb3DApp;
 
@@ -62,7 +63,7 @@ funcs.digamma = ['cdigamma', 1];
 function parseEquation(eq) {
 	if (eq.type == 'Literal') {
 		if (eq.imag) {
-			return `vec2(0, ${eq.value.toFixed(1)})`;
+			return `vec2(0, ${eq.value.toFixed(20)})`;
 		}
 		if (eq.value == 'i') {
 			return 'vec2(0, 1)';
@@ -70,11 +71,20 @@ function parseEquation(eq) {
 		return eq.value.toFixed(20);
 	}
 	if (eq.type == 'Identifier') {
-		if (eq.name != 'z' && eq.name != 'c' && eq.name != 't') {
-			throw new Error(`Translation error: variable must be z, c or t (got ${eq.name})`)
+		if (eq.name != 'z' && eq.name != 'c' && eq.name != 't' && eq.name[0] != "r") {
+			throw new Error(`Translation error: variable must be z, c, t or start with r (got ${eq.name})`)
 		}
 		if (eq.name == 't') {
 			needsTime = true;
+		}
+		if (eq.name[0] == 'r') {
+			if (eq.name.length > 1) {
+				if (!rands[eq.name]) {
+					rands[eq.name] = Math.random();
+				}
+				return rands[eq.name]
+			}
+			return Math.random();
 		}
 		return eq.name
 	}
@@ -189,6 +199,7 @@ function generateTexture(){
 function updateValues(){
 	time = 0.0;
 	needsTime = false;
+	rands = {};
 	parsedEquation = parseEquation(jsep(currentEquation));
 	material.fragmentShader = "#define MAX_ITERATIONS " + currentNumIterations.toFixed(1).toString() + "\n #define INTERVALAS_PER_COLOR " 
 		+ currentColorScale.toFixed(1).toString() + "\n #define NUM_COLORS " + numTextureColors.toFixed(1).toString() 
