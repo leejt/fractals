@@ -43,7 +43,7 @@
 			</div>
 			<div class="input_element">
 				<div class="input_menu_label">Num Iterations:</div>
-				<div class="input_menu_input"><input id="input_iterations" type="text" value="100" maxlength="4" size="12"></div>
+				<div class="input_menu_input"><input id="input_iterations" type="text" value="100" maxlength="" size="12"></div>
 			</div>
 			<div class="input_element">
 				<div class="input_menu_label">Color scale:</div>
@@ -307,10 +307,10 @@
 	}
 
 	void main()	{
-		vec2 p = gl_FragCoord.xy/resolution.xy;
-		p = (p*spaceArea)+minPoint;
+		vec2 c = gl_FragCoord.xy/resolution.xy;
+		c = (c*spaceArea)+minPoint;
 		float iteration = 0.0;
-		vec2 z = vec2(p.x, p.y);
+		vec2 z = vec2(c.x, c.y);
 		
 		for(int i = 0; i < int(MAX_ITERATIONS); i++)
 		{

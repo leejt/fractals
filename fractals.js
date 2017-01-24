@@ -68,10 +68,10 @@ function parseEquation(eq) {
 		return eq.value.toFixed(1);
 	}
 	if (eq.type == 'Identifier') {
-		if (eq.name != 'z') {
-			throw new Error(`Translation error: variable must be z (got ${eq.name})`)
+		if (eq.name != 'z' && eq.name != 'c') {
+			throw new Error(`Translation error: variable must be z or c (got ${eq.name})`)
 		}
-		return 'z'
+		return eq.name
 	}
 	if (eq.type == 'BinaryExpression') {
 		var left = parseEquation(eq.left);
@@ -269,7 +269,6 @@ function texFiltering(){
 function onEquationChanged()
 {
 	currentEquation = document.getElementById('input_equation').value;
-	console.log(uniforms)
 };
 
 function onIterationsChanged()
