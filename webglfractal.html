@@ -319,10 +319,31 @@
 	}
 
 	vec2 ctanh(vec2 a) {
-		return cdiv(cexp(a)-cexp(-a),cexp(a)+cexp(-a));
+		return cdiv(cexp(2.0 * a) - vec2(1,0),cexp(2.0 * a) + vec2(1,0));
 	}
 	float ctanh(float a) {
-		return (exp(a)-exp(-a))/(exp(a)+(exp(-a)));
+		return (exp(2.0 * a) - 1.0)/(exp(2.0 * a) + 1.0);
+	}
+
+	vec2 ccsch(vec2 a) {
+		return cdiv(1.0, csinh(a));
+	}
+	float ccsch(float a) {
+		return ccsch(vec2(a,0)).x;
+	}
+
+	vec2 csech(vec2 a) {
+		return cdiv(1.0, ccosh(a));
+	}
+	float csech(float a) {
+		return ccsch(vec2(a,0)).x;
+	}
+
+	vec2 ccoth(vec2 a) {
+		return cdiv(cexp(2.0 * a) + vec2(1,0), cexp(2.0 * a) - vec2(1,0));
+	}
+	float ccoth(float a) {
+		return ccoth(vec2(a,0)).x;
 	}
 
 	vec2 cgamma_helper(vec2 a) {

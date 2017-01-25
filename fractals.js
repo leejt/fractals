@@ -72,6 +72,9 @@ funcs.arccot = ['cacot', 1];
 funcs.sinh = ['csinh', 1];
 funcs.cosh = ['ccosh', 1];
 funcs.tanh = ['ctanh', 1];
+funcs.csch = ['ccsch', 1];
+funcs.sech = ['csech', 1];
+funcs.coth = ['ccoth', 1];
 funcs.gamma = ['cgamma', 1];
 funcs.digamma = ['cdigamma', 1];
 
