@@ -177,6 +177,7 @@
 		return exp(a);
 	}
 
+	float pi = 3.1415926535897932384626433832795;
 
 	vec2 cpow(vec2 a, vec2 b) {
 		float arg = atan(a.y, a.x);
@@ -261,6 +262,48 @@
 		return log(a);
 	}
 
+	vec2 casin(vec2 a) {
+		return cmul(vec2(0,-1), clog(cmul(vec2(0,1),a) + cpow(vec2(1,0) - c2(a),0.5)));
+	}
+	float casin(float a) {
+		return casin(vec2(a,0)).x;
+	}
+
+	vec2 cacos(vec2 a) {
+		return vec2(pi/2.0, 0) - cmul(vec2(0,-1), clog(cmul(vec2(0,1),a) + cpow(vec2(1,0) - c2(a),0.5)));
+	}
+	float cacos(float a) {
+		return cacos(vec2(a,0)).x;
+	}
+
+	vec2 catan(vec2 a) {
+		return cmul(vec2(0,0.5), clog(vec2(1,0) - cdiv(vec2(0,1),a)) - clog(vec2(1,0) + cdiv(vec2(0,1),a)));
+	}
+	float catan(float a) {
+		return catan(vec2(a,0)).x;
+	}
+
+	vec2 cacsc(vec2 a) {
+		return casin(cdiv(vec2(1,0),a));
+	}
+	float cacsc(float a) {
+		return cacsc(vec2(a,0)).x;
+	}
+
+	vec2 casec(vec2 a) {
+		return cacos(cdiv(vec2(1,0),a));
+	}
+	float casec(float a) {
+		return casec(vec2(a,0)).x;
+	}
+
+	vec2 cacot(vec2 a) {
+		return catan(cdiv(vec2(1,0),a));
+	}
+	float cacot(float a) {
+		return cacot(vec2(a,0)).x;
+	}
+
 	vec2 csinh(vec2 a) {
 		return (cexp(a) - cexp(-a))/2.0;
 	}
@@ -281,8 +324,6 @@
 	float ctanh(float a) {
 		return (exp(a)-exp(-a))/(exp(a)+(exp(-a)));
 	}
-
-	float pi = 3.1415926535897932384626433832795;
 
 	vec2 cgamma_helper(vec2 a) {
 		a = a - vec2(1, 0);

@@ -57,6 +57,18 @@ funcs.tan = ['ctan', 1];
 funcs.csc = ['ccsc', 1];
 funcs.sec = ['csec', 1];
 funcs.cot = ['ccot', 1];
+funcs.asin = ['casin', 1];
+funcs.arcsin = ['casin', 1];
+funcs.acos = ['cacos', 1];
+funcs.arccos = ['cacos', 1];
+funcs.atan = ['catan', 1];
+funcs.arctan = ['catan', 1];
+funcs.acsc = ['cacsc', 1];
+funcs.arccsc = ['cacsc', 1];
+funcs.asec = ['casec', 1];
+funcs.arcsec = ['casec', 1];
+funcs.acot = ['cacot', 1];
+funcs.arccot = ['cacot', 1];
 funcs.sinh = ['csinh', 1];
 funcs.cosh = ['ccosh', 1];
 funcs.tanh = ['ctanh', 1];
@@ -256,7 +268,7 @@ function onRewind(event) {
 }
 
 function onTimeSet(event) {
-	var newValue = parseInt(document.getElementById('input_time').value);
+	var newValue = parseFloat(document.getElementById('input_time').value);
 	if(newValue == NaN){
 		newValue = time;
 	}
