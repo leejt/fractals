@@ -281,7 +281,7 @@ function onTimeSet(event) {
 	event.preventDefault();
 }
 
-function checkHeihgt()
+function checkHeight()
 {
 	var menuHeight = document.getElementById('topmenu').style.height;
 	var menuHeightInt = parseInt(menuHeight.replace('px',''));
@@ -303,7 +303,7 @@ _initFunction = function(web3DApp)
 		texture: {type: "t", value: generateTexture()}
 	};
 	
-	checkHeihgt();
+	checkHeight();
 	
 	currAR = web3DApp.winHeight/web3DApp.winWidth;
 	uniforms.resolution.value.x = web3DApp.winWidth;
@@ -342,15 +342,24 @@ _updateFunction = function(web3DApp)
 	var currentTime = Date.now();
 	var elapsed = currentTime - lastTime;
 	lastTime = currentTime;
-	
+	var difference = 1;
 	if(zoomOut){
+		difference = (currentZoom + zoomAcc * elapsed) / currentZoom;
 		currentZoom += zoomAcc * elapsed;
 		zoomAcc = currentZoom / 1000.0;
 	}else if(zoomIn){
+		difference = (currentZoom - zoomAcc * elapsed) / currentZoom;
 		currentZoom -= zoomAcc * elapsed;
 		zoomAcc = currentZoom / 1000.0;
 	}
 	
+	if (zoomIn || zoomOut) {
+		x_click = mouseLatsPos.x*(currentZoom)+(currentDesp.x-currentZoom/2);
+		currentDesp.x = difference*(currentDesp.x-x_click)+x_click
+		y_click = (1-mouseLatsPos.y)*(currAR*currentZoom)+(currentDesp.y-currAR*currentZoom/2);
+		console.log(y_click);
+		currentDesp.y = difference*(currentDesp.y-y_click)+y_click
+	}
 	if (needsTime && playing) {
 		time += elapsed/1000.0;
 		document.getElementById('input_time').value = time.toFixed(3);
@@ -365,7 +374,7 @@ _updateFunction = function(web3DApp)
 
 _resizeFunction = function(web3DApp)
 {
-	checkHeihgt();
+	checkHeight();
 	
 	currAR = web3DApp.winHeight/web3DApp.winWidth;
 	uniforms.resolution.value.x = web3DApp.winWidth;
