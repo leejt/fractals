@@ -77,6 +77,7 @@ funcs.sech = ['csech', 1];
 funcs.coth = ['ccoth', 1];
 funcs.gamma = ['cgamma', 1];
 funcs.digamma = ['cdigamma', 1];
+funcs.zeta = ['czeta', 1];
 
 function parseEquation(eq) {
 	if (eq.type == 'Literal') {
