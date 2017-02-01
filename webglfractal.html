@@ -433,7 +433,7 @@
 	    tot += cdiv((19473809.0 - dn), cpow(9.0, a));
 	    tot -= cdiv((22095249.0 - dn), cpow(10.0, a));
 
-    	return cdiv((-1.0/dn * tot), (1.0-cpow(2.0, 1.0-a)));
+    	return cdiv((-1.0/dn * tot), (vec2(1.0,0)-cpow(2.0, vec2(1.0,0)-a)));
 	}
 	float czeta(float a) {
 		return czeta(vec2(a,0)).x;
