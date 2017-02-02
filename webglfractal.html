@@ -418,23 +418,32 @@
 		return cdigamma(vec2(a,0)).x;
 	}
 
-	vec2 czeta(vec2 a) {
-		float n = 10.0;
+	vec2 czeta_helper(vec2 a) {
 		vec2 tot = vec2(0.0,0.0);
+		float n = 10.0;
 		float dn = 22619537.0;
-	    tot += cdiv((1.0 - dn), cpow(1.0, a));
-	    tot -= cdiv((201.0 - dn), cpow(2.0, a));
-	    tot += cdiv((6801.0 - dn), cpow(3.0, a));
-	    tot -= cdiv((91281.0 - dn), cpow(4.0, a));
-	    tot += cdiv((640401.0 - dn), cpow(5.0, a));
-	    tot -= cdiv((2690449.0 - dn), cpow(6.0, a));
-	    tot += cdiv((7349649.0 - dn), cpow(7.0, a));
-	    tot -= cdiv((13903249.0 - dn), cpow(8.0, a));
-	    tot += cdiv((19473809.0 - dn), cpow(9.0, a));
-	    tot -= cdiv((22095249.0 - dn), cpow(10.0, a));
-
+		tot += 1.0 * cdiv((1.0 - dn), cpow(1.0, a));
+		tot += -1.0 * cdiv((201.0 - dn), cpow(2.0, a));
+		tot += 1.0 * cdiv((6801.0 - dn), cpow(3.0, a));
+		tot += -1.0 * cdiv((91281.0 - dn), cpow(4.0, a));
+		tot += 1.0 * cdiv((640401.0 - dn), cpow(5.0, a));
+		tot += -1.0 * cdiv((2690449.0 - dn), cpow(6.0, a));
+		tot += 1.0 * cdiv((7349649.0 - dn), cpow(7.0, a));
+		tot += -1.0 * cdiv((13903249.0 - dn), cpow(8.0, a));
+		tot += 1.0 * cdiv((19473809.0 - dn), cpow(9.0, a));
+		tot += -1.0 * cdiv((22095249.0 - dn), cpow(10.0, a));
     	return cdiv((-1.0/dn * tot), (vec2(1.0,0)-cpow(2.0, vec2(1.0,0)-a)));
 	}
+
+	vec2 czeta(vec2 a) {
+		if (a.x < 0.5) {
+			// return cmul(cmul(cmul(cmul(cpow(2.00000000000000000000, a), cpow(pi, csub(a, 1.00000000000000000000))), csin(cdiv(cmul(pi, a), 2.00000000000000000000))), cgamma(csub(1.00000000000000000000, a))), czeta_helper(csub(1.00000000000000000000, a)));
+			return cmul(cmul(cmul(cmul(cpow(2.0,a),cpow(pi,csub(a,vec2(1,0)))),csin(pi * a / 2.0)),cgamma(csub(vec2(1.0,0.0),a))), czeta_helper(csub(vec2(1.0,0.0),a)));
+		} else {
+			return czeta_helper(a);
+		}
+	}
+
 	float czeta(float a) {
 		return czeta(vec2(a,0)).x;
 	}
