@@ -51,6 +51,8 @@ var e_val = Math.exp(1).toString();
 funcs = {};
 funcs.exp = ['cexp', 1]
 funcs.log = ['clog', 1];
+funcs.mod = ['cmod', 2];
+funcs.tet = ['ctet', 2];
 funcs.sin = ['csin', 1];
 funcs.cos = ['ccos', 1];
 funcs.tan = ['ctan', 1];
@@ -79,7 +81,7 @@ funcs.gamma = ['cgamma', 1];
 funcs.digamma = ['cdigamma', 1];
 funcs.zeta = ['czeta', 1];
 
-function parseEquation(eq) {
+function parseEquation(eq, allowvars) {
 	if (eq.type == 'Literal') {
 		if (eq.imag) {
 			return `vec2(0, ${eq.value.toFixed(20)})`;
@@ -91,7 +93,9 @@ function parseEquation(eq) {
 	}
 	if (eq.type == 'Identifier') {
 		if (eq.name != 'z' && eq.name != 'c' && eq.name != 't' && eq.name[0] != "r") {
-			throw new Error(`Translation error: variable must be z, c, t or start with r (got ${eq.name})`)
+			if (!allowvars) {
+				throw new Error(`Translation error: variable must be z, c, t or start with r (got ${eq.name})`)
+			}
 		}
 		if (eq.name == 't') {
 			needsTime = true;
@@ -108,8 +112,8 @@ function parseEquation(eq) {
 		return eq.name
 	}
 	if (eq.type == 'BinaryExpression') {
-		var left = parseEquation(eq.left);
-		var right = parseEquation(eq.right);
+		var left = parseEquation(eq.left, allowvars);
+		var right = parseEquation(eq.right, allowvars);
 		if (eq.operator == '+') {
 			return `cadd(${left}, ${right})`;
 		}
@@ -136,7 +140,7 @@ function parseEquation(eq) {
 		}
 	}
 	if (eq.type == 'UnaryExpression') {
-		var argument = parseEquation(eq.argument);
+		var argument = parseEquation(eq.argument, allowvars);
 		if (eq.operator == '-') {
 			return `-${argument}`;
 		}
@@ -144,7 +148,7 @@ function parseEquation(eq) {
 	if (eq.type == 'CallExpression') {
 		var arguments = []
 		for (var i = 0; i < eq.arguments.length; i++) {
-			arguments.push(parseEquation(eq.arguments[i]));
+			arguments.push(parseEquation(eq.arguments[i], allowvars));
 		}
 		var name = eq.callee.name;
 		if (funcs[name] == undefined) {
@@ -358,7 +362,7 @@ _updateFunction = function(web3DApp)
 		x_click = mouseLatsPos.x*(currentZoom)+(currentDesp.x-currentZoom/2);
 		currentDesp.x = difference*(currentDesp.x-x_click)+x_click
 		y_click = (1-mouseLatsPos.y)*(currAR*currentZoom)+(currentDesp.y-currAR*currentZoom/2);
-		console.log(y_click);
+		console.log(x_click, y_click);
 		currentDesp.y = difference*(currentDesp.y-y_click)+y_click
 	}
 	if (needsTime && playing) {
