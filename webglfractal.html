@@ -196,7 +196,7 @@
 	vec2 cpow(float a, vec2 b) {
 		float log = log(a);
 		float ex = exp(b.x*log);
-		return vec2(ex*cos(b.y*log), ex*sin(b.y)*log);
+		return vec2(ex*cos(b.y*log), ex*sin(b.y*log));
 	}
 	vec2 cpow(vec2 a, float b) {
 		float arg = atan(a.y, a.x);
